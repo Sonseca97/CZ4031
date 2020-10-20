@@ -916,6 +916,7 @@ void  Memory::deleteNode(Mass* curMass, float val, int curMassPosition) {
 	for (int i = 0;dataFound == false && i <= curMass->tNodes; i++) {
 		if (val < curMass->key[i] && curMass->childMass[i] != NULL) {
 			deleteNode(curMass->childMass[i], val, i);
+			numberOfMerges++;
 
 		}
 		//if we could find the target key at any leafMass then
