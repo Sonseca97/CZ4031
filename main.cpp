@@ -19,30 +19,18 @@ int main()
 
         switch (selection) {
         case 1:
-            cout << "\n Initialise Memory\n";
-            storageMem = initMemory();
-            break;
-        case 2:
-            cout << "\n Read From File\n";
-            readFromFile();
-            break;
-        case 3:
-            cout << "\n Load into Memory\n";
-            loadIntoMemory(storageMem);
-            break;
-        case 4:
             cout << "\n Initialise Memory + Read File + Load to Memory\n";
             storageMem = initMemory();
             readFromFile();
             loadIntoMemory(storageMem);
             break;
-        case 5:
+        case 2:
             cout << "\n Display Record Statistics\n";
             storageMem->getRecordStats(storageMem->getRootBlockPointer()->rootRecord);
             //storageMem->iterMemory();
             //initBPlusTree(storageMem);
             break;
-        case 6:
+        case 3:
         {
 			cout << "\n Insert the memory data into B+ Tree...\n";
 			cout << "number of Pointers: ";
@@ -52,19 +40,19 @@ int main()
             storageMem->readMemory();
 			break;
         }
-        case 7:
+        case 4:
             cout << "\n Print B+ Tree...\n";
             storageMem->resultPrint();
             break;
-        case 8:
+        case 5:
             cout << "\n Search for value...\n";
             storageMem->searchEqual();
             break;
-        case 9:
+        case 6:
             cout << "\n Search for range between 7 and 9 ..\n";
             storageMem->range_search();
             break;
-        case 10:
+        case 7:
             cout << "\n Delete the memory data from the B+ Tree...\n";
             cout << "delete movies with averageRating = 7.0: ";
             storageMem->readMemoryUpdated();
@@ -87,9 +75,9 @@ Memory* initMemory() {
     bool initSuccess = false;
 
     cout << "\n-- Initialising Memory --" << endl;
-    size_t memSize = 1024 * 1024 * 100;
+    size_t memSize = 1024 * 1024 * 500;
     cout << "Memory Size Checked!" << endl;
-    size_t blockSize = 100;
+    size_t blockSize = 500;
     cout << "Record Block Size Checked!" << endl;
     Memory* memory = new Memory(memSize, blockSize);
     cout << "Memory Database Created!" << endl;
@@ -133,6 +121,7 @@ void readFromFile() {
             cout << record.averageRating << endl;
             cout << record.numVotes << endl;
             */
+            record.indexing = recCount+1;
             recordList.push_back(record);
             recCount++;
         }
@@ -145,19 +134,16 @@ void readFromFile() {
 void displayMainMenu() {
     cout << "\n Menu";
     cout << "\n====Database Storage====";
-    cout << "\n 1 - Initialise Memory";
-    cout << "\n 2 - Read From File";
-    cout << "\n 3 - Load into Memory";
-    cout << "\n 4 - Initialise Memory + Read File + Load to Memory";
-    cout << "\n 5 - Display Record Statistics";
+    cout << "\n 1 - Initialise Memory + Read File + Load to Memory";
+    cout << "\n 2 - Display Record Statistics";
 	cout << "\n========Insertion=======";
-	cout << "\n 6 - Insertion";
-	cout << "\n 7 - Print Tree";
+	cout << "\n 3 - Insertion";
+	cout << "\n 4 - Print Tree";
 	cout << "\n========Search===========";
-	cout << "\n 8 - Search one value";
-	cout << "\n 9 - Search within range";
+	cout << "\n 5 - Search one value";
+	cout << "\n 6 - Search within range";
     cout << "\n========Delete===========";
-    cout << "\n 10 - Deletion";
+    cout << "\n 7 - Deletion";
     cout << "\n 0 - Exit";
 
     cout << "\n Enter selection: ";

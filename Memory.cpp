@@ -177,7 +177,8 @@ struct Block* Memory::getCurrentBlockPointer(){
 
 bool Memory::isCurrentBlockFull(std::size_t recordSize){
 
-    if((currentBlockPtr->recordCount * (recordSize+1)) > blockSize){
+    if((currentBlockPtr->recordCount * 20) >= ((int)blockSize)){
+    //if (currentBlockPtr->recordCount==5){
         return true;
     }
     else{
@@ -215,6 +216,7 @@ void Memory::iterMemory(){
             std::cout << "Tconst: " << currRecord->tconst << std::endl;
             currRecord = currRecord->next;
         }while(currRecord != NULL);
+        std::cout << "\n" << endl;
         currBlock = currBlock->nextBlock;
     }while(currBlock != NULL);
 
@@ -243,9 +245,9 @@ void Memory::printBlock(set <int> indexes, bool isEqual){
         i++;
         if(indexes.count(i)){
             while(currRecord!=NULL){
-                myfile << "Tconst: " << currRecord->tconst << "\n";
-                myfile << "averageRating: " << currRecord->averageRating << "\n";
-                myfile << "numVote: " << currRecord->numVotes << "\n";
+                myfile << "Tconst: " << currRecord->tconst;
+                myfile << " averageRating: " << currRecord->averageRating;
+                myfile << " numVote: " << currRecord->numVotes << "\n";
                 currRecord = currRecord->next;
             }
             myfile << "\n";
@@ -579,6 +581,7 @@ void Memory::search_range(vector < Mass* > Masses) {
 	printNode(curMass, false);
 	vector <string> ttconsts;
 	equal_search_node++;
+	vector <int> indexings;
 	set <int> blockIndexs;
 	int i = 0;
 	while (i<curMass->tNodes){
@@ -601,10 +604,9 @@ void Memory::search_range(vector < Mass* > Masses) {
         cout << "Not found\n";
 	}else{
         for(int i=0;i<ttconsts.size();i++){
-            int tconstint = stoi(ttconsts[i].substr(2,10));
-            int blockIndex = ceil(tconstint/5.0);
+            int blockIndex = ceil(indexings[i]/25.0);
             blockIndexs.insert(blockIndex);
-            cout << ttconsts[i] << endl;
+            cout << ttconsts[i] <<endl;
         }
 	}
 	cout << "number of index nodes accessed: " << equal_search_node << endl;
@@ -662,6 +664,7 @@ void Memory::searchEqual(){
 	}
 	printNode(curMass, true);
 	vector <string> ttconsts;
+	vector <int> indexings;
 	equal_search_node++;
 	set <int> blockIndexs;
 	int i = 0;
@@ -671,6 +674,7 @@ void Memory::searchEqual(){
         }
         if (fabs(curMass->key[i]-x) < epsilon){
             ttconsts.push_back(curMass->index[i]->tconst);
+            indexings.push_back(curMass->index[i]->indexing);
 			found = true;
 		}
 		i++;
@@ -690,12 +694,14 @@ void Memory::searchEqual(){
         // cout << ttconsts.size() << endl;
         cout << "values of tconst found: "<<endl;
         for(int i=0;i<ttconsts.size();i++){
-            int tconstint = stoi(ttconsts[i].substr(2,10));
-            int blockIndex = ceil(tconstint/25.0);
+            //int tconstint = stoi(ttconsts[i].substr(2,10));
+            //int blockIndex = ceil(tconstint/5.0);
+            int blockIndex = ceil(indexings[i]/25.0);
             blockIndexs.insert(blockIndex);
             cout << ttconsts[i] <<endl;
         }
 	}
+
 	cout << "number of index nodes accessed: " << equal_search_node << endl;
 	cout << "number of data blocks accessed: " << blockIndexs.size() << endl;
 	cout << "content of index nodes and data blocks are saved into txt files respectively!" << endl;

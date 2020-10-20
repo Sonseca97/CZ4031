@@ -7,12 +7,16 @@
 using namespace std;
 #define INT_MAX 2147483647
 #define MAX 50
-
 struct Record{
     char tconst[10];
     float averageRating;
     int numVotes;
+    int indexing;
     struct Record *next;
+    Record(){
+        next = NULL;
+    }
+
 };
 
 struct Block{
