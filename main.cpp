@@ -75,9 +75,9 @@ Memory* initMemory() {
     bool initSuccess = false;
 
     cout << "\n-- Initialising Memory --" << endl;
-    size_t memSize = 1024 * 1024 * 500;
+    size_t memSize = 1024 * 1024 * 100;
     cout << "Memory Size Checked!" << endl;
-    size_t blockSize = 500;
+    size_t blockSize = 100;
     cout << "Record Block Size Checked!" << endl;
     Memory* memory = new Memory(memSize, blockSize);
     cout << "Memory Database Created!" << endl;

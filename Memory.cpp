@@ -591,6 +591,7 @@ void Memory::search_range(vector < Mass* > Masses) {
         if (curMass->key[i] >= x){
             found = true;
             ttconsts.push_back(curMass->index[i]->tconst);
+            indexings.push_back(curMass->index[i]->indexing);
 		}
 		i++;
 		if (i==curMass->tNodes){
@@ -604,7 +605,8 @@ void Memory::search_range(vector < Mass* > Masses) {
         cout << "Not found\n";
 	}else{
         for(int i=0;i<ttconsts.size();i++){
-            int blockIndex = ceil(indexings[i]/25.0);
+            int blockIndex = ceil(indexings[i]/5.0);
+
             blockIndexs.insert(blockIndex);
             cout << ttconsts[i] <<endl;
         }
@@ -696,7 +698,7 @@ void Memory::searchEqual(){
         for(int i=0;i<ttconsts.size();i++){
             //int tconstint = stoi(ttconsts[i].substr(2,10));
             //int blockIndex = ceil(tconstint/5.0);
-            int blockIndex = ceil(indexings[i]/25.0);
+            int blockIndex = ceil(indexings[i]/5.0);
             blockIndexs.insert(blockIndex);
             cout << ttconsts[i] <<endl;
         }
