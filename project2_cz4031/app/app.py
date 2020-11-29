@@ -14,9 +14,9 @@ import argparse
 
 class App(object):
 
-    def __init__(self, parent, host, port, database, user, password, path):
+    def __init__(self, parent, args):
         self.root = parent
-        self.root.title("Main Frame")
+        self.root.title("Query Explanation")
         self.frm_input_text = tk.Frame(self.root)
         self.frm_input_text.pack()
         self.frm_input = tk.Frame(self.root)
@@ -69,7 +69,7 @@ class App(object):
             self.frm_input_text, text='Please Input Query:', font=(None, 16), width=60)
         self.input_text1.pack(side=LEFT, pady=5)
         self.input_text2 = tk.Label(
-            self.frm_input_text, text='Please Input Predicates: (seperated by space)', font=(None, 13), width=75)
+            self.frm_input_text, text='Please input lines from sql code to replace, followed by\n replaced code in picasso templates form seperated by comma. ', font=(None, 12), width=75)
         self.input_text2.pack(side=RIGHT, pady=5)
 
         self.input1 = tk.Text(self.frm_input_t, relief=GROOVE,
@@ -90,32 +90,22 @@ class App(object):
         self.nlp_text1 = tk.Label(
             self.frm_nlp_text, text='Query Execution Plan:', font=(None, 16), width=60)
         self.nlp_text1.pack(side=LEFT, pady=5)
-        # self.nlp_text2 = tk.Label(
-        #     self.frm_nlp_text, text='New Query Execution Plan:                     ', font=(None, 16), width=75)
-        # self.nlp_text2.pack(side=RIGHT, pady=5)
+      
 
         self.nlp1 = tk.Text(self.frm_nlp_t, relief=GROOVE, width=75,
                             height=8, borderwidth=5, font=(None, 12), state='disabled')
         self.nlp1.pack(side=LEFT, padx=10)
-        # self.nlp2 = tk.Text(self.frm_nlp_t, relief=RIDGE, width=75,
-        #                     height=8, borderwidth=5, font=(None, 12), state='disabled')
-        # self.nlp2.pack(side=RIGHT, padx=10)
         self.placeholder1 = tk.Label(self.frm_nlp_btt, width=10)
         self.placeholder1.pack()
 
         self.tree_text1 = tk.Label(
             self.frm_tree_text, text='Query Tree Structure:', font=(None, 16), width=60)
         self.tree_text1.pack(side=LEFT, pady=5)
-        # self.tree_text2 = tk.Label(
-        #     self.frm_tree_text, text='New Query Tree Structure:                     ', font=(None, 16), width=75)
-        # self.tree_text2.pack(side=RIGHT, pady=5)
+    
 
         self.tree1 = tk.Text(self.frm_tree_t, relief=GROOVE, width=75,
                              height=8, borderwidth=5, font=(None, 12), state='disabled')
         self.tree1.pack(side=LEFT, padx=10)
-        # self.tree2 = tk.Text(self.frm_tree_t, relief=RIDGE, width=75,
-        #                      height=8, borderwidth=5, font=(None, 12), state='disabled')
-        # self.tree2.pack(side=RIGHT, padx=10)
         self.placeholder2 = tk.Label(self.frm_tree_btt, width=10)
         self.placeholder2.pack()
 
@@ -138,12 +128,21 @@ class App(object):
                                width=10, height=2, command=self.quitprogram)
         self.quit_.pack(pady=10)
 
-        self.host = host
-        self.port = port
-        self.database = database
-        self.user = user
-        self.password = password
-        self.path = path
+        self.psp = ''
+        self.explanation_dict = {
+            'Hash Join': 'it has best performance on large, sorted and non-indexed inputs, it is ideal for joining large tables.\n\n',
+            'Nested Loop': 'it has the best performance on small inputs, it is the fastest on join due to having the least number of comparison.\n\n',
+            'Index Scan': 'it performs much better when retrieving an insignificant number of rows compared to the total number rows.\n\n',
+            'Seq Scan': 'it only requires a single i/o to fetch multiple rows from a block and is much faster than index scan.\n\n',
+            'Merge Join': 'it has the best performance on sorted input, it is ideal for joining two independent inputs.\n\n'
+        }
+        self.host = args.host
+        self.port = args.port
+        self.database = args.database
+        self.user = args.user
+        self.password = args.password
+        self.path = args.picassopath
+        self.dbdescriptor = args.dbdescriptor
         self.server = 'runServer.bat'
         self.owd = os.getcwd()
         os.chdir(self.path)
@@ -159,27 +158,33 @@ class App(object):
         query_old = self.input1.get("1.0", END)
         self.attributes = self.input2.get("1.0", END)
         self.query_picasso = self.convert_picasso(query_old)
+
+        os.chdir(self.owd)
+        # save the picasso template into sql file
         with open("picasso.sql", 'w') as file:
             file.write(self.query_picasso)
         file.close()
-        cmd = "cmd /k PicassoCmd localhost 4444 pg default POSTGRES_Default_U_ Uniform Compilation  F:\\NTU\\Y4\\project2_cz4031\\picasso.sql 10"
+    
+        sql_path = os.path.join(os.getcwd(), 'picasso.sql')
+        sql_path = sql_path.replace('\\', '\\\\')
+
+        #change to picasso directory
+        os.chdir(self.path)
+
+        cmd = "cmd /k PicassoCmd localhost 4444 " + self.dbdescriptor + " default POSTGRES_Default_U_ Uniform Compilation "+sql_path+' 10'
+
+        print(cmd)
         os.system(cmd)
-        # import picassoconnect
-        # os.system('python picassoconnect.py')
-        
+    
         print("send to picasso...")
+        # change to original directory
         os.chdir(self.owd)
 
-        # query_new = self.input2.get("1.0", END)
         result_old = self.get_query_result(query_old)
-        # result_new = self.get_query_result(query_new)
         result_old_obj = json.loads(json.dumps(result_old))
-        # result_new_obj = json.loads(json.dumps(result_new))
         result_old_nlp = self.get_description(result_old_obj)
-        # result_new_nlp = self.get_description(result_new_obj)
         result_old_tree = self.get_tree(result_old_obj)
-        # result_new_tree = self.get_tree(result_new_obj)
-        # result_diff = self.get_difference(result_old_obj, result_new_obj)
+
         result_picasso = self.get_picasso(query_old)
 
         self.nlp1.configure(state='normal')
@@ -200,17 +205,23 @@ class App(object):
         self.exp.insert(END, result_picasso)
 
     def convert_picasso(self, query):
-        query_list = query.split()
-        attributes = self.attributes.split()
-        whr_idx = query_list.index("where")
 
-        for attr in attributes:
-            query_list.insert(whr_idx+1, attr)
-            query_list.insert(whr_idx+2, ':varies')
-            query_list.insert(whr_idx+3, 'and')
-            whr_idx += 3
-        picasso_template = ' '.join(query_list)
-        return picasso_template
+        query_list = query.split()
+        attributes = self.attributes.split(',')
+        i = 0
+        while i < len(attributes):
+            self.psp += attributes[i]
+            query = query.replace(attributes[i], attributes[i+1].strip())
+            i += 2
+        # whr_idx = query_list.index("where")
+
+        # for attr in attributes:
+        #     query_list.insert(whr_idx+1, attr)
+        #     query_list.insert(whr_idx+2, ':varies')
+        #     query_list.insert(whr_idx+3, 'and')
+        #     whr_idx += 3
+        # picasso_template = ' '.join(query_list)
+        return query
 
 
     def clear_input(self):
@@ -235,6 +246,7 @@ class App(object):
         query_ex = 'explain (analyze, costs, verbose, buffers, format json) ' + query
         result, _ = connection.execute(query_ex)
         connection.close()
+        self.sql_cost = result[0][0][0]['Plan']['Total Cost']
         return result[0][0]
 
     def get_description(self, json_obj):
@@ -247,16 +259,52 @@ class App(object):
     def get_tree(self, json_obj):
         head = parse_json(json_obj)
         return generate_tree("", head)
-
-    def get_difference(self, json_object_A, json_object_B):
-        diff = get_diff(json_object_A, json_object_B)
-        return diff
     
     def get_picasso(self, query):
         connection = DBConnection(self.host, self.port, self.database, self.user, self.password)
-        df = connection.get_table('picassoplantree')
-        num_plan = len(df.planno.unique())
-        result = "Picasso can generate {} plans by this setting.".format(num_plan)
+        result = ''
+        df_plan_tree = connection.get_table('picassoplantree')
+        # df_plan_tree.to_csv("plantree.csv", index=False)
+        df_plan_store = connection.get_table('picassoplanstore')
+        # df_plan_store.to_csv('planstore.csv', index=False)
+        df_selectivitylog = connection.get_table('picassoselectivitylog')
+        # df_selectivitylog.to_csv("selectivitylog.csv", index=False)
+
+
+        # functions for plantree
+        num_plan = len(df_plan_tree.planno.unique())
+        # using cost to get postgresql plan
+        plan_max_idx_by_range = df_plan_store[(df_plan_store.cost>(self.sql_cost-2000))&(df_plan_store.cost<(self.sql_cost+2000))].planno.value_counts().index.tolist()[0] 
+        plan_max_by_range = df_plan_store.planno.value_counts().loc[plan_max_idx_by_range]
+
+        # using gini to get postgresql plan
+        # plan_count = df_plan_store.groupby('planno').count()
+        # plan_max = plan_count['qtid'].max()
+        # plan_max_idx = plan_count[plan_count.qtid==plan_max].index.values.tolist()[0]
+        
+        # calculate gini
+        gini_plan = plan_max_by_range / 100
+        pos_df = df_plan_tree[df_plan_tree.planno==plan_max_idx_by_range]
+ 
+        attributes = self.psp.replace('and', '')
+        result += "Picasso can generate {} plans by this setting.\n".format(num_plan)
+        result += "Among these plans, plan number {} is the plan chosen by Postgresql with Gini coefficient {}. " \
+            .format(plan_max_idx_by_range, gini_plan)
+        result += "The query’s where condition {} will determine the selectivity space and thus determine the steps which Postgres take in order to compute the most optimal plan. "\
+                    .format(attributes)
+        result += "Compare to Picasso's {} plans, each plan would be the most optimal for a certain selectivity space. In this case, plan {} is the most optimal plan, with a Gini index of {}.\n\n"\
+                    .format(num_plan, plan_max_idx_by_range, gini_plan)
+        result += "---------Statistics and Analysis-----------\n"
+
+        op_list = ['Nested Loop', 'Merge Join','Index Scan', 'Seq Scan', 'Hash Join']
+        for i, op in pos_df.iterrows():
+            if op['name'] not in op_list:
+                continue 
+            else:
+                o_id = op['id']
+                op_prev = ' '.join(pos_df[pos_df['parentid']==o_id]['name'].values.tolist())
+                result += "-Operation of {} on/after {} with cost {} and cardinality {} after the operation. \n".format(op['name'], op_prev, op['cost'], op['card'])
+                result += "-{} is used because ".format(op['name']) + self.explanation_dict[op['name']]
         return result
         
     def quitprogram(self):
@@ -273,15 +321,10 @@ if __name__ == "__main__":
     parser.add_argument('--database', help='the tpch database to connect')
     parser.add_argument('--user', help='db user')
     parser.add_argument('--password', help='db password')
-    parser.add_argument('--picassopath', default='C:\Program Files (x86)\picasso2.1\picasso2.1\PicassoRun\Windows', help='path to picasso server runServer.bat')
+    parser.add_argument('--dbdescriptor', help='DBConnection descriptor in Picasso', default='pg')
+    parser.add_argument('--picassopath', default='C:\Program Files (x86)\picasso2.1\picasso2.1\PicassoRun\Windows', help='path to folder where runServer.bat is located')
     args = parser.parse_args()
-    host = args.host
-    port = args.port
-    database = args.database
-    user = args.user
-    password = args.password
-    path = args.picassopath
     root = tk.Tk()
-    app = App(root, host, port, database, user, password, path)
+    app = App(root, args)
     root.geometry('1500x1000+0+0')
     root.mainloop()
