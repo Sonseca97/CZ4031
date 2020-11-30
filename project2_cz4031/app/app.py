@@ -66,7 +66,7 @@ class App(object):
         self.frm_diff_btt.pack(side=RIGHT)
 
         self.input_text1 = tk.Label(
-            self.frm_input_text, text='Please Input Query:', font=(None, 16), width=60)
+            self.frm_input_text, text='Please Input Query:', font=(None, 14), width=60)
         self.input_text1.pack(side=LEFT, pady=5)
         self.input_text2 = tk.Label(
             self.frm_input_text, text='Please input lines from sql code to replace, followed by\n replaced code in picasso templates form seperated by comma. ', font=(None, 12), width=75)
@@ -75,20 +75,20 @@ class App(object):
         self.input1 = tk.Text(self.frm_input_t, relief=GROOVE,
                               width=75, height=8, borderwidth=5, font=(None, 12))
         self.input1.pack(side=LEFT, padx=10)
-        self.input2 = tk.Text(self.frm_input_t, relief=RIDGE,
-                              width=60, height=4, borderwidth=5, font=(None, 12))
+        self.input2 = tk.Text(self.frm_input_t, relief=GROOVE,
+                              width=75, height=8, borderwidth=5, font=(None, 12))
         self.input2.pack(side=RIGHT, padx=10)
 
-        self.view = tk.Button(self.frm_input_btt, text="view output",
+        self.view = tk.Button(self.frm_input_btt, text="display results",
                               width=10, height=2, command=self.retrieve_input)
         self.view.pack(pady=10)
 
-        self.clear = tk.Button(self.frm_input_btt, text="clear input",
+        self.clear = tk.Button(self.frm_input_btt, text="clear box",
                                width=10, height=2, command=self.clear_input)
         self.clear.pack(pady=10)
 
         self.nlp_text1 = tk.Label(
-            self.frm_nlp_text, text='Query Execution Plan:', font=(None, 16), width=60)
+            self.frm_nlp_text, text='Query Execution Plan in Natural Language:', font=(None, 14), width=60)
         self.nlp_text1.pack(side=LEFT, pady=5)
       
 
@@ -99,13 +99,13 @@ class App(object):
         self.placeholder1.pack()
 
         self.tree_text1 = tk.Label(
-            self.frm_tree_text, text='Query Tree Structure:', font=(None, 16), width=60)
-        self.tree_text1.pack(side=LEFT, pady=5)
+            self.frm_nlp_text, text='Query Execution Plan in Tree Structure:', font=(None, 14), width=60)
+        self.tree_text1.pack(side=RIGHT, pady=5)
     
 
-        self.tree1 = tk.Text(self.frm_tree_t, relief=GROOVE, width=75,
+        self.tree1 = tk.Text(self.frm_nlp_t, relief=GROOVE, width=75,
                              height=8, borderwidth=5, font=(None, 12), state='disabled')
-        self.tree1.pack(side=LEFT, padx=10)
+        self.tree1.pack(side=RIGHT, padx=10)
         self.placeholder2 = tk.Label(self.frm_tree_btt, width=10)
         self.placeholder2.pack()
 
@@ -121,12 +121,10 @@ class App(object):
         self.exp.pack(side=LEFT, padx=10)
 
         self.clear_out = tk.Button(
-            self.frm_diff_btt, text="clear output", width=10, height=2, command=self.clear_output)
+            self.frm_diff_btt, text="clear box", width=10, height=2, command=self.clear_output)
         self.clear_out.pack(pady=10)
 
-        self.quit_ = tk.Button(self.frm_diff_btt, text="quit program",
-                               width=10, height=2, command=self.quitprogram)
-        self.quit_.pack(pady=10)
+
 
         self.psp = ''
         self.explanation_dict = {
@@ -149,6 +147,22 @@ class App(object):
         os.startfile(self.server)
         print("started picasso server")
         
+
+    def clear_input(self):
+        self.input1.delete("1.0", END)
+        self.input2.delete("1.0", END)
+
+    def clear_output(self):
+        self.nlp1.delete("1.0", END)
+        # self.nlp2.delete("1.0", END)
+        self.tree1.delete("1.0", END)
+        # self.tree2.delete("1.0", END)
+        self.exp.delete("1.0", END)
+        self.nlp1.configure(state='disabled')
+        # self.nlp2.configure(state='disabled')
+        self.tree1.configure(state='disabled')
+        # self.tree2.configure(state='disabled')
+        self.exp.configure(state='disabled')
 
     def retrieve_input(self):
         global query_old
@@ -205,7 +219,6 @@ class App(object):
         self.exp.insert(END, result_picasso)
 
     def convert_picasso(self, query):
-
         query_list = query.split()
         attributes = self.attributes.split(',')
         i = 0
@@ -223,22 +236,6 @@ class App(object):
         # picasso_template = ' '.join(query_list)
         return query
 
-
-    def clear_input(self):
-        self.input1.delete("1.0", END)
-        self.input2.delete("1.0", END)
-
-    def clear_output(self):
-        self.nlp1.delete("1.0", END)
-        # self.nlp2.delete("1.0", END)
-        self.tree1.delete("1.0", END)
-        # self.tree2.delete("1.0", END)
-        self.exp.delete("1.0", END)
-        self.nlp1.configure(state='disabled')
-        # self.nlp2.configure(state='disabled')
-        self.tree1.configure(state='disabled')
-        # self.tree2.configure(state='disabled')
-        self.exp.configure(state='disabled')
 
     def get_query_result(self, query):
         # DBConnection takes 5 arguments
@@ -307,11 +304,7 @@ class App(object):
                 result += "-{} is used because ".format(op['name']) + self.explanation_dict[op['name']]
         return result
         
-    def quitprogram(self):
-        result = messagebox.askokcancel(
-            "Quit the game.", "Are you sure?", icon='warning')
-        if result == True:
-            self.root.destroy()
+
 
 
 if __name__ == "__main__":
